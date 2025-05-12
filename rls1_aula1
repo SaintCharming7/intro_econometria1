@@ -1,0 +1,74 @@
+#library(foreign)
+#library(plm)
+#library(wooldridge)
+#library(dplyr)
+package_list<- c("foreign", "plm", "wooldridge", "dplyr")
+lapply(package_list, require, character.only = TRUE)
+data("cars")
+
+#verificando as dimensões da base de dados
+dim(cars)
+# 50 linhas e 2 colunas
+
+# verificando a relação entre velocidade e distância
+# gráfico de disperção 
+
+plot(dist ~ speed, data = cars,
+     xlab = "velocidade (milhas por hora)",
+     ylab = "distância ao parar (em pés)",
+     main = "Distância ao parar x Velocidade",
+     pch  = 20,
+     cex  = 2,
+     col  = "lightblue")
+
+
+str(cars)
+# aparentemente existe uma relação positiva (?)
+
+
+# calculando a correlação
+correlation <- cor(cars$dist, cars$speed)
+correlation
+
+# por outros métodos...
+cor(cars$dist, cars$speed, method = "spearman")
+cor(cars$dist, cars$speed, method = "kendall")
+
+# colocando uma linha
+
+model <- lm(dist ~ speed, data = cars)
+abline(model, col = "maroon", lwd = 2)
+
+# coeficientes
+b1 <- round(coef(model)[1], 2)  # Intercepto
+b2 <- round(coef(model)[2], 2)  # Coeficiente angular
+
+# colocando a equação sobre a linha
+text(x = max(cars$speed) - 5, y = max(cars$dist) - 10, 
+     labels = paste0("y = ", b1, " + ", b2, "x"), 
+     col = "maroon", cex = 1.2)
+
+
+
+summary(model) # resultados regressão
+coef(model)
+
+s_speed <- sum(cars$speed) # soma de velo
+s_dist <- sum(cars$dist) # soma dist
+
+
+fitted_values <- model$fitted.values  # valores ajustados
+fitted_values
+actual_values <- cars$dist            # valores observados
+residuals <- actual_values - fitted_values  # Residuos
+print(residuals)
+head(cars)
+sum(residuals)
+
+
+plot(fitted(model), residuals, 
+     xlab = "Valores Ajustados", ylab = "Resíduos", 
+     main = "", pch = 20, col = "lightblue")
+abline(h = 0, col = "maroon", lwd = 2)
+
+
